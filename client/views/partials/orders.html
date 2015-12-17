@@ -1,0 +1,38 @@
+<div ng-controller = 'OrdersController'>
+	<h1>Add a New Order</h1>
+	<!-- objects and properties nothing scary -->
+	Customer:<select ng-model = 'new_order.customer'>
+	 			<option ng-repeat = "customer in customers" value = "{{customer.name}}">{{customer.name}}</option>
+			</select>
+	Order:
+	<select ng-model = 'new_order.quantity'>
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+		<option value="6">6</option>
+		<option value="7">7</option>
+		<option value="8">8</option>
+		<option value="9">9</option>
+		<option value="10">10</option>
+	</select>
+	<input type="text" ng-model="new_order.product" placeholder="product">
+	<input type="submit" ng-click="addorders()">
+	<!-- here is where we are going to display people -->
+	<input type="text" ng-model="filter_name" placeholder="filter">
+	<table>
+		<tr>
+			<th>Customer Name</th>
+			<th>Product</th>
+			<th>Quantity</th>
+			<th>Created Date</th>
+		</tr>
+		<tr ng-repeat="order in orders | filter: filter_name">
+			<td>{{order.customer}}</td>
+			<td>{{order.product}}</td>
+			<td>{{order.quantity}}</td>
+			<td>{{order.date}}</td>
+		</tr>
+	</table>
+</div>

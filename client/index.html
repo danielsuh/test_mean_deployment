@@ -1,0 +1,119 @@
+<html ng-app="app">
+<head>
+	<title></title>
+	<!-- require angular -->
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.min.js"></script> 
+	<script>
+	// PUT ANGULAR CODE HERE
+	var appModule = angular.module('app', ['ngRoute']);
+	appModule.config(function($routeProvider) {
+		$routeProvider
+		.when('/', {
+			templateUrl: 'views/partials/customers.html'
+		})
+		.when('/orders', {
+			templateUrl: 'views/partials/orders.html'
+		})
+		.otherwise({
+			redirectTo: '/'
+		})
+	});
+	appModule.factory('CustomerFactory', function($http) {
+		var factory = {};
+		var customers = [];
+		var errors;
+		factory.getCustomers = function(callback) {
+			$http.get('/customers').success(function(output){
+				customers = output;
+				callback(customers);
+			})
+		}
+		factory.addcustomers =  function(info, callback) {
+			$http.post('/customers/new', info).success(function(){
+				callback();
+			});
+		}
+		factory.removecustomers = function(info, callback) {
+			$http.post('/customers/remove', info).success(function(){
+				callback();
+			});
+		}
+		return factory;
+	});
+	appModule.factory('OrderFactory', function($http) {
+		var factory = {};
+		var orders = [];
+		factory.getOrders = function(callback) {
+			$http.get('/orders').success(function(output) {
+				orders = output;
+				callback(orders);
+			})
+		}
+		factory.addorders = function(info, callback) {
+			$http.post('/orders/new', info).success(function() {
+				callback();
+			});
+		}
+		return factory;
+	});
+	appModule.controller('CustomersController', function($scope, CustomerFactory) {
+		function getCustomers(){
+			CustomerFactory.getCustomers(function(data){
+				$scope.customers = data;
+			});
+		}
+		getCustomers();
+		$scope.addcustomers = function() {
+			for(var i = 0; i < $scope.customers.length; i++)
+			{
+				if($scope.customers[i].name == $scope.new_customer.name)
+				{
+					$scope.errors = "ERROR YOU CANNOT HAVE DUPLICATES";
+					$scope.new_customer = {};
+					return;
+				}
+			}
+			CustomerFactory.addcustomers($scope.new_customer, function() {
+			$scope.new_customer = {};
+			$scope.errors = null;
+			getCustomers();
+			})
+		}
+		$scope.removecustomers = function(customer) {
+			CustomerFactory.removecustomers(customer, function(){
+				getCustomers();
+			})
+		}
+	});
+	appModule.controller('OrdersController', function($scope, OrderFactory, CustomerFactory) {
+		$scope.customers = [];
+		$scope.orders = [];
+		function getOrders(){
+			OrderFactory.getOrders(function(data){
+				$scope.orders = data;
+			});
+		}
+		function getCustomers(){
+			CustomerFactory.getCustomers(function(data){
+				$scope.customers = data;
+			});
+		}
+		getCustomers();
+		getOrders();
+		$scope.addorders = function() {
+			OrderFactory.addorders($scope.new_order, function() {
+				$scope.new_order = {};
+				getOrders();
+			})
+		}
+	})
+	</script>
+	</head>
+<!-- everything in the body is going to use the friends controller (this gives us access to the friends controller $scope) -->
+<body>
+	<a href="#/">Customers</a> | <a href="#/orders">Orders</a>
+	<div ng-view = ''>
+	</div>
+</body>
+</html>
